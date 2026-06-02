@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+    branches: ["master", "main"]
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go/go.mod
+          cache-dependency-path: go/go.sum
+
+      - name: Vet
+        run: cd go && go vet ./...
+
+      - name: Test
+        run: cd go && go test ./...
+
+      - name: Build
+        run: cd go && CGO_ENABLED=0 go build -trimpath -o /dev/null .

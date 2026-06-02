@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# Create a GitHub release for the current version.
+#
+# Usage: ./scripts/release [--dry-run]
+#
+# Prerequisites:
+#   - gh CLI installed and authenticated (gh auth login)
+#   - On the commit that was tagged by bump-version
+#   - Working directory is the repo root
+#
+# What this script does:
+#   1. Reads the current version from go/cmd/root.go
+#   2. Checks that a matching git tag exists locally
+#   3. Cross-compiles all release binaries
+#   4. Generates a SHA-256 checksum file
+#   5. Extracts release notes for this version from CHANGELOG.md
+#   6. Pushes the tag to origin (if not already there)
+#   7. Creates a GitHub release and uploads all assets
+#
+# Options:
+#   --dry-run   Print what would happen without creating the release or pushing the tag
+
+set -euo pipefail
+
+DRY_RUN=false
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+    *) echo "Unknown option: $arg"; exit 1 ;;
+  esac
+done
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+GO_DIR="${PROJECT_DIR}/go"
+VERSION_FILE="${GO_DIR}/cmd/root.go"
+
+# ── 1. Read version ────────────────────────────────────────────────────────────
+VERSION=$(grep 'const cliVersion' "$VERSION_FILE" | sed 's/.*"\(.*\)".*/\1/')
+if [ -z "$VERSION" ]; then
+  echo "ERROR: could not read cliVersion from $VERSION_FILE" >&2
+  exit 1
+fi
+TAG="v${VERSION}"
+echo "Version: ${VERSION}  (tag: ${TAG})"
+
+# ── 2. Verify tag exists locally ──────────────────────────────────────────────
+if ! git -C "$PROJECT_DIR" tag --list | grep -qx "$TAG"; then
+  echo ""
+  echo "ERROR: git tag ${TAG} not found." >&2
+  echo "Run ./scripts/bump-version <major|minor|patch> first." >&2
+  exit 1
+fi
+
+# ── 3. Check gh is available ──────────────────────────────────────────────────
+if ! command -v gh &>/dev/null; then
+  echo "ERROR: gh CLI not found. Install it from https://cli.github.com and run 'gh auth login'." >&2
+  exit 1
+fi
+
+# ── 4. Build binaries ─────────────────────────────────────────────────────────
+echo ""
+echo "Building binaries..."
+
+DIST_DIR="${PROJECT_DIR}/dist/${TAG}"
+mkdir -p "$DIST_DIR"
+
+declare -A TARGETS=(
+  ["linux/amd64"]="grn-linux-amd64"
+  ["linux/arm64"]="grn-linux-arm64"
+  ["darwin/amd64"]="grn-darwin-amd64"
+  ["darwin/arm64"]="grn-darwin-arm64"
+  ["windows/amd64"]="grn-windows-amd64.exe"
+)
+
+for platform in "${!TARGETS[@]}"; do
+  os="${platform%%/*}"
+  arch="${platform##*/}"
+  out="${DIST_DIR}/${TARGETS[$platform]}"
+  echo "  ${os}/${arch} → ${TARGETS[$platform]}"
+  if [ "$DRY_RUN" = false ]; then
+    (cd "$GO_DIR" && CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
+      go build -trimpath -ldflags="-s -w" -o "$out" .)
+  fi
+done
+
+# ── 5. Generate checksums ─────────────────────────────────────────────────────
+CHECKSUMS="${DIST_DIR}/checksums.txt"
+echo ""
+echo "Generating checksums..."
+if [ "$DRY_RUN" = false ]; then
+  (cd "$DIST_DIR" && sha256sum grn-linux-amd64 grn-linux-arm64 \
+    grn-darwin-amd64 grn-darwin-arm64 grn-windows-amd64.exe > checksums.txt)
+  cat "$CHECKSUMS"
+else
+  echo "  [dry-run: skipped]"
+fi
+
+# ── 6. Extract release notes ──────────────────────────────────────────────────
+NOTES_FILE="${DIST_DIR}/release-notes.md"
+echo ""
+echo "Extracting release notes for ${VERSION}..."
+python3 "${SCRIPT_DIR}/extract-release-notes" "$VERSION" > "$NOTES_FILE"
+cat "$NOTES_FILE"
+
+# ── 7. Push tag ───────────────────────────────────────────────────────────────
+echo ""
+if [ "$DRY_RUN" = true ]; then
+  echo "[dry-run] Would push tag ${TAG} to origin"
+else
+  echo "Pushing tag ${TAG} to origin..."
+  git -C "$PROJECT_DIR" push origin "$TAG"
+fi
+
+# ── 8. Create GitHub release ──────────────────────────────────────────────────
+echo ""
+if [ "$DRY_RUN" = true ]; then
+  echo "[dry-run] Would create GitHub release ${TAG} with assets:"
+  for platform in "${!TARGETS[@]}"; do
+    echo "  ${DIST_DIR}/${TARGETS[$platform]}"
+  done
+  echo "  ${CHECKSUMS}"
+  echo ""
+  echo "Release notes:"
+  cat "$NOTES_FILE"
+  exit 0
+fi
+
+echo "Creating GitHub release ${TAG}..."
+gh release create "$TAG" \
+  --title "${TAG}" \
+  --notes-file "$NOTES_FILE" \
+  "${DIST_DIR}/grn-linux-amd64" \
+  "${DIST_DIR}/grn-linux-arm64" \
+  "${DIST_DIR}/grn-darwin-amd64" \
+  "${DIST_DIR}/grn-darwin-arm64" \
+  "${DIST_DIR}/grn-windows-amd64.exe" \
+  "${CHECKSUMS}"
+
+echo ""
+echo "Release ${TAG} published!"
+echo "View at: $(gh release view "${TAG}" --json url -q .url)"

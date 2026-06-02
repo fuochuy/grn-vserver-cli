@@ -11,6 +11,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.4.0] - 2026-06-02
+
+### Added
+- Full command reference documentation for all vServer resources: server, volume, VPC, subnet, security group, security group rules, images, flavors, and volume types (26 new pages under `docs/commands/vserver/`)
+- `CHANGELOG.md`, `CONTRIBUTING.md`, and `CONTRIBUTORS.md`
+- Release tooling: `scripts/release`, `scripts/bump-version`, `scripts/render-changelog`, `scripts/extract-release-notes`
+- GitHub Actions CI workflow (`ci.yml`) — runs `go vet`, `go test`, and build on every PR and push to main
+- GitHub Actions release workflow (`release.yml`) — builds all platform binaries, generates `checksums.txt`, extracts release notes from `CHANGELOG.md`, and publishes a GitHub release on tag push
+- Makefile targets: `bump-patch`, `bump-minor`, `bump-major`, `release`, `release-dry-run`
+- `.changes/` changelog fragment system for per-PR changelog entries
+
+---
+
 ## [1.3.2] - 2026-06-02
 
 ### Added
@@ -83,7 +96,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Cross-compiled binaries for Linux (amd64/arm64), macOS (amd64/arm64), and Windows (amd64)
 - One-line installer script
 
-[Unreleased]: https://github.com/vngcloud/greennode-cli/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/vngcloud/greennode-cli/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/vngcloud/greennode-cli/compare/v1.3.2...v1.4.0
 [1.3.2]: https://github.com/vngcloud/greennode-cli/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/vngcloud/greennode-cli/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/vngcloud/greennode-cli/compare/v1.2.0...v1.3.0

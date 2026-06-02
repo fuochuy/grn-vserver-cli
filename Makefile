@@ -2,7 +2,7 @@ BINARY  := grn
 GO_DIR  := go
 VERSION := $(shell grep 'const cliVersion' $(GO_DIR)/cmd/root.go | sed 's/.*"\(.*\)".*/\1/')
 
-.PHONY: build build-all clean install fmt vet test lint help
+.PHONY: build build-all clean install fmt vet test release bump-patch bump-minor bump-major help
 
 ## build: build binary for current OS/arch → ./grn
 build:
@@ -33,11 +33,32 @@ vet:
 test:
 	cd $(GO_DIR) && go test ./...
 
-## clean: remove built binaries
+## release: build, tag, and publish a GitHub release (requires gh auth login)
+release:
+	./scripts/release
+
+## release-dry-run: preview what release would do without pushing or publishing
+release-dry-run:
+	./scripts/release --dry-run
+
+## bump-patch: bump patch version (1.3.2 → 1.3.3), merge changelog, commit & tag
+bump-patch:
+	./scripts/bump-version patch
+
+## bump-minor: bump minor version (1.3.2 → 1.4.0), merge changelog, commit & tag
+bump-minor:
+	./scripts/bump-version minor
+
+## bump-major: bump major version (1.3.2 → 2.0.0), merge changelog, commit & tag
+bump-major:
+	./scripts/bump-version major
+
+## clean: remove built binaries and dist/
 clean:
 	rm -f $(BINARY) $(BINARY)-linux-amd64 $(BINARY)-linux-arm64 \
 	      $(BINARY)-darwin-amd64 $(BINARY)-darwin-arm64 \
 	      $(BINARY)-windows-amd64.exe
+	rm -rf dist/
 
 ## help: list available targets
 help:
