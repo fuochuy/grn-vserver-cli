@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Merge .changes/ fragments into CHANGELOG.md.
+
+Usage:
+  render-changelog --merge <version>    # merge fragments into CHANGELOG.md and delete them
+  render-changelog --preview <version>  # print what would be added without modifying files
+"""
+
+import argparse
+import datetime
+import os
+import re
+import sys
+
+CHANGES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".changes")
+CHANGELOG   = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "CHANGELOG.md")
+
+TYPE_ORDER  = ["feature", "fix", "change", "internal", "docs"]
+TYPE_LABELS = {
+    "feature":  "Added",
+    "fix":      "Fixed",
+    "change":   "Changed",
+    "internal": "Internal",
+    "docs":     "Documentation",
+}
+
+
+def parse_fragment(path):
+    with open(path) as f:
+        content = f.read()
+
+    header_match = re.match(r"^---\n(.*?)\n---\n(.*)", content, re.DOTALL)
+    if not header_match:
+        print(f"WARNING: skipping malformed fragment {path}", file=sys.stderr)
+        return None
+
+    meta_block, body = header_match.group(1), header_match.group(2).strip()
+
+    type_match = re.search(r"type:\s*(\S+)", meta_block)
+    if not type_match:
+        print(f"WARNING: no 'type:' in {path}", file=sys.stderr)
+        return None
+
+    return {"type": type_match.group(1).lower(), "body": body, "path": path}
+
+
+def collect_fragments():
+    fragments = []
+    if not os.path.isdir(CHANGES_DIR):
+        return fragments
+    for name in sorted(os.listdir(CHANGES_DIR)):
+        if name.endswith(".md") and name != "README.md":
+            f = parse_fragment(os.path.join(CHANGES_DIR, name))
+            if f:
+                fragments.append(f)
+    return fragments
+
+
+def render_section(version, fragments):
+    today = datetime.date.today().isoformat()
+    lines = [f"## [{version}] - {today}", ""]
+
+    by_type = {}
+    for f in fragments:
+        by_type.setdefault(f["type"], []).append(f["body"])
+
+    for t in TYPE_ORDER:
+        if t not in by_type:
+            continue
+        lines.append(f"### {TYPE_LABELS.get(t, t.capitalize())}")
+        lines.append("")
+        for item in by_type[t]:
+            for line in item.splitlines():
+                lines.append(f"- {line}" if not line.startswith("-") else line)
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def insert_into_changelog(version, section):
+    with open(CHANGELOG) as f:
+        content = f.read()
+
+    marker = "## [Unreleased]"
+    if marker not in content:
+        print(f"ERROR: '{marker}' not found in CHANGELOG.md", file=sys.stderr)
+        sys.exit(1)
+
+    new_content = content.replace(
+        f"{marker}\n\n---\n",
+        f"{marker}\n\n---\n\n{section}\n---\n",
+    )
+
+    # Update the [Unreleased] comparison link
+    repo = "https://github.com/vngcloud/greennode-cli"
+    new_content = re.sub(
+        r"\[Unreleased\]: .*",
+        f"[Unreleased]: {repo}/compare/v{version}...HEAD\n[{version}]: {repo}/compare/",
+        new_content,
+        count=1,
+    )
+
+    with open(CHANGELOG, "w") as f:
+        f.write(new_content)
+
+    print(f"CHANGELOG.md updated with {version} section.")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--merge", metavar="VERSION")
+    group.add_argument("--preview", metavar="VERSION")
+    args = parser.parse_args()
+
+    version = args.merge or args.preview
+    fragments = collect_fragments()
+
+    if not fragments:
+        print("No changelog fragments found in .changes/ — nothing to do.")
+        return
+
+    section = render_section(version, fragments)
+    print(section)
+
+    if args.merge:
+        insert_into_changelog(version, section)
+        for f in fragments:
+            os.remove(f["path"])
+            print(f"Deleted {f['path']}")
+
+
+if __name__ == "__main__":
+    main()
