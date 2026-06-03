@@ -92,7 +92,7 @@ def insert_into_changelog(version, section):
     )
 
     # Update the [Unreleased] comparison link
-    repo = "https://github.com/vngcloud/greennode-cli"
+    repo = "https://github.com/fuochuy/grn-vserver-cli"
     new_content = re.sub(
         r"\[Unreleased\]: .*",
         f"[Unreleased]: {repo}/compare/v{version}...HEAD\n[{version}]: {repo}/compare/",

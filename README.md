@@ -1,7 +1,7 @@
 # GreenNode CLI
 
-[![CI](https://github.com/vngcloud/greennode-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/vngcloud/greennode-cli/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/vngcloud/greennode-cli)](https://github.com/vngcloud/greennode-cli/releases/latest)
+[![CI](https://github.com/fuochuy/grn-vserver-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/fuochuy/grn-vserver-cli/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/vngcloud/greennode-cli)](https://github.com/fuochuy/grn-vserver-cli/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8.svg)](https://go.dev)
 
@@ -23,7 +23,7 @@ Universal Command Line Interface for **GreenNode** (powered by VNG Cloud).
 
 ## Installation
 
-Download the latest binary for your platform from [GitHub Releases](https://github.com/vngcloud/greennode-cli/releases/latest):
+Download the latest binary for your platform from [GitHub Releases](https://github.com/fuochuy/grn-vserver-cli/releases/latest):
 
 | Platform | Architecture | Binary |
 |----------|-------------|--------|
@@ -31,17 +31,18 @@ Download the latest binary for your platform from [GitHub Releases](https://gith
 | macOS | Intel | `grn-darwin-amd64` |
 | Linux | x86_64 | `grn-linux-amd64` |
 | Linux | ARM64 | `grn-linux-arm64` |
-| Windows | x86_64 | `grn-windows-amd64.exe` |
+| Windows | x86_64 (64-bit) | `grn-windows-amd64.exe` |
+| Windows | x86 (32-bit) | `grn-windows-386.exe` |
 
 ```bash
 # macOS Apple Silicon
-curl -L -o grn https://github.com/vngcloud/greennode-cli/releases/latest/download/grn-darwin-arm64
+curl -L -o grn https://github.com/fuochuy/grn-vserver-cli/releases/latest/download/grn-darwin-arm64
 chmod +x grn
 sudo mv grn /usr/local/bin/
 
 # Verify
 grn --version
-# grn-cli/1.3.2 Go/1.22.x darwin/arm64
+# grn-cli/1.5.0 Go/1.25.x darwin/arm64
 ```
 
 **One-line installer** (macOS / Linux):
@@ -50,10 +51,10 @@ grn --version
 curl -fsSL https://raw.githubusercontent.com/vngcloud/greennode-cli/main/scripts/install | bash
 ```
 
-**Build from source** (requires [Go 1.22+](https://go.dev/dl/)):
+**Build from source** (requires [Go 1.25+](https://go.dev/dl/)):
 
 ```bash
-git clone https://github.com/vngcloud/greennode-cli.git
+git clone https://github.com/fuochuy/grn-vserver-cli.git
 cd greennode-cli/go
 go build -o grn .
 sudo mv grn /usr/local/bin/
@@ -114,7 +115,7 @@ grn vserver vpc list
 grn vserver server create --dry-run --name test ...
 ```
 
-Full command reference: [docs/commands/](docs/commands/)
+Usage guide: [docs/usage/](docs/usage/README.md) · Full command reference: [docs/commands/](docs/commands/)
 
 ---
 
@@ -150,7 +151,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
 Quick start:
 
 ```bash
-git clone https://github.com/vngcloud/greennode-cli.git
+git clone https://github.com/fuochuy/grn-vserver-cli.git
 cd greennode-cli/go
 go build -o grn .
 ./grn --version

@@ -15,6 +15,7 @@ build-all:
 	cd $(GO_DIR) && CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 go build -trimpath -o ../$(BINARY)-darwin-amd64 .
 	cd $(GO_DIR) && CGO_ENABLED=0 GOOS=darwin  GOARCH=arm64 go build -trimpath -o ../$(BINARY)-darwin-arm64 .
 	cd $(GO_DIR) && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -o ../$(BINARY)-windows-amd64.exe .
+	cd $(GO_DIR) && CGO_ENABLED=0 GOOS=windows GOARCH=386  go build -trimpath -o ../$(BINARY)-windows-386.exe  .
 
 ## install: build and install to /usr/local/bin
 install: build
@@ -57,7 +58,8 @@ bump-major:
 clean:
 	rm -f $(BINARY) $(BINARY)-linux-amd64 $(BINARY)-linux-arm64 \
 	      $(BINARY)-darwin-amd64 $(BINARY)-darwin-arm64 \
-	      $(BINARY)-windows-amd64.exe
+	      $(BINARY)-windows-amd64.exe \
+	      $(BINARY)-windows-386.exe
 	rm -rf dist/
 
 ## help: list available targets

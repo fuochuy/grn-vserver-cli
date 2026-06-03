@@ -71,6 +71,7 @@ declare -A TARGETS=(
   ["darwin/amd64"]="grn-darwin-amd64"
   ["darwin/arm64"]="grn-darwin-arm64"
   ["windows/amd64"]="grn-windows-amd64.exe"
+  ["windows/386"]="grn-windows-386.exe"
 )
 
 for platform in "${!TARGETS[@]}"; do
@@ -90,7 +91,7 @@ echo ""
 echo "Generating checksums..."
 if [ "$DRY_RUN" = false ]; then
   (cd "$DIST_DIR" && sha256sum grn-linux-amd64 grn-linux-arm64 \
-    grn-darwin-amd64 grn-darwin-arm64 grn-windows-amd64.exe > checksums.txt)
+    grn-darwin-amd64 grn-darwin-arm64 grn-windows-amd64.exe grn-windows-386.exe > checksums.txt)
   cat "$CHECKSUMS"
 else
   echo "  [dry-run: skipped]"
@@ -135,6 +136,7 @@ gh release create "$TAG" \
   "${DIST_DIR}/grn-darwin-amd64" \
   "${DIST_DIR}/grn-darwin-arm64" \
   "${DIST_DIR}/grn-windows-amd64.exe" \
+  "${DIST_DIR}/grn-windows-386.exe" \
   "${CHECKSUMS}"
 
 echo ""
