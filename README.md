@@ -3,7 +3,7 @@
 [![CI](https://github.com/fuochuy/grn-vserver-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/fuochuy/grn-vserver-cli/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/vngcloud/greennode-cli)](https://github.com/fuochuy/grn-vserver-cli/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Go](https://img.shields.io/badge/Go-1.22+-00ADD8.svg)](https://go.dev)
+[![Go](https://img.shields.io/badge/Go-1.25+-00ADD8.svg)](https://go.dev)
 
 Universal Command Line Interface for **GreenNode** (powered by VNG Cloud).
 
