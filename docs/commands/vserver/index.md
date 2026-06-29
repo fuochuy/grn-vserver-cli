@@ -82,6 +82,13 @@ grn vserver <resource> <command> [options]
 | [placement-group edit](edit-placement-group.md) | Update a placement group |
 | [placement-group delete](delete-placement-group.md) | Delete a placement group |
 
+### User Image
+
+| Command | Description |
+|---------|-------------|
+| [user-image list](list-user-images.md) | List all user images |
+| [user-image delete](delete-user-image.md) | Delete a user image |
+
 ### Reference
 
 | Command | Description |

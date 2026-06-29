@@ -47,6 +47,7 @@ func runMCP(cmd *cobra.Command, args []string) error {
 	registerSecgroupTools(s)
 	registerSSHKeyTools(s)
 	registerPlacementGroupTools(s)
+	registerUserImageTools(s)
 
 	return server.ServeStdio(s)
 }
@@ -533,6 +534,30 @@ func registerPlacementGroupTools(s *server.MCPServer) {
 	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		return textResult(grn("vserver", "placement-group", "delete", "--force",
 			"--placement-group-id", sarg(getArgs(r), "placementGroupId"),
+		)), nil
+	})
+}
+
+// ── user image tools ──────────────────────────────────────────────────────────
+
+func registerUserImageTools(s *server.MCPServer) {
+	s.AddTool(mcp.NewTool("list_user_images",
+		mcp.WithDescription("List all user images (custom images created from servers) in the project."),
+		opt("name"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := []string{"vserver", "user-image", "list"}
+		if n := sarg(getArgs(r), "name"); n != "" {
+			args = append(args, "--name", n)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("delete_user_image",
+		mcp.WithDescription("Delete a user image. This action is irreversible. Always confirm with the user before calling this."),
+		req("userImageId", "User image ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "user-image", "delete", "--force",
+			"--user-image-id", sarg(getArgs(r), "userImageId"),
 		)), nil
 	})
 }
