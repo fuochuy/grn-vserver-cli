@@ -662,6 +662,27 @@ func registerNetworkInterfaceTools(s *server.MCPServer) {
 		return textResult(grn(args...)), nil
 	})
 
+	s.AddTool(mcp.NewTool("create_network_interface",
+		mcp.WithDescription("Create a new elastic network interface in a zone. Optionally attach tags."),
+		req("name", "Name of the network interface"),
+		req("zoneId", "Availability zone ID (e.g. HCM03-1C)"),
+		mcp.WithString("tags", mcp.Description("Optional tags as a comma-separated list of key=value pairs, e.g. \"env=prod,team=infra\"")),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "network-interface", "create",
+			"--name", sarg(a, "name"),
+			"--zone-id", sarg(a, "zoneId"),
+		}
+		if tags := sarg(a, "tags"); tags != "" {
+			for _, t := range strings.Split(tags, ",") {
+				if t = strings.TrimSpace(t); t != "" {
+					args = append(args, "--tag", t)
+				}
+			}
+		}
+		return textResult(grn(args...)), nil
+	})
+
 	s.AddTool(mcp.NewTool("rename_network_interface",
 		mcp.WithDescription("Rename an elastic network interface. Only the name can be changed."),
 		req("networkInterfaceId", "Network interface ID"),
@@ -672,6 +693,31 @@ func registerNetworkInterfaceTools(s *server.MCPServer) {
 			"--network-interface-id", sarg(a, "networkInterfaceId"),
 			"--name", sarg(a, "name"),
 		)), nil
+	})
+
+	s.AddTool(mcp.NewTool("update_network_interface_tags",
+		mcp.WithDescription("Replace the key/value tag list of a network interface. The provided tags become the complete set — any tag not included is removed. Tags that were changed should go in editedTags so they are marked isEdited=true."),
+		req("networkInterfaceId", "Network interface ID whose tags to update"),
+		mcp.WithString("tags", mcp.Description("Unchanged tags as a comma-separated list of key=value pairs (isEdited=false), e.g. \"env=prod,team=infra\"")),
+		mcp.WithString("editedTags", mcp.Description("Changed tags as a comma-separated list of key=value pairs (isEdited=true)")),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "network-interface", "update-tags",
+			"--network-interface-id", sarg(a, "networkInterfaceId"),
+		}
+		appendTagFlags := func(value, flag string) {
+			if value == "" {
+				return
+			}
+			for _, t := range strings.Split(value, ",") {
+				if t = strings.TrimSpace(t); t != "" {
+					args = append(args, flag, t)
+				}
+			}
+		}
+		appendTagFlags(sarg(a, "tags"), "--tag")
+		appendTagFlags(sarg(a, "editedTags"), "--edited-tag")
+		return textResult(grn(args...)), nil
 	})
 
 	s.AddTool(mcp.NewTool("delete_network_interface",

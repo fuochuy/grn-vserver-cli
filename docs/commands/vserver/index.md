@@ -105,7 +105,9 @@ grn vserver <resource> <command> [options]
 | Command | Description |
 |---------|-------------|
 | [network-interface list](list-network-interfaces.md) | List all elastic network interfaces |
+| [network-interface create](create-network-interface.md) | Create a new elastic network interface |
 | [network-interface edit](edit-network-interface.md) | Rename a network interface |
+| [network-interface update-tags](update-network-interface-tags.md) | Update the tag list of a network interface |
 | [network-interface delete](delete-network-interface.md) | Delete a network interface |
 
 ### DHCP

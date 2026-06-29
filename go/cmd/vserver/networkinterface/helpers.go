@@ -1,6 +1,9 @@
 package networkinterface
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/vngcloud/greennode-cli/internal/client"
 	"github.com/vngcloud/greennode-cli/internal/config"
@@ -98,4 +101,41 @@ func outputInterfaceList(cmd *cobra.Command, cfg *config.Config, result interfac
 		return vserverclient.OutputWithColumns(cmd, cfg, transformForTable(result), tableColumns)
 	}
 	return outputResult(cmd, cfg, result)
+}
+
+// parseTags converts repeated key=value flags into the API tag list used on create.
+// Each entry must contain a "=" separator and a non-empty key.
+func parseTags(raw []string) ([]interface{}, error) {
+	tags := make([]interface{}, 0, len(raw))
+	for _, t := range raw {
+		key, value, found := strings.Cut(t, "=")
+		key = strings.TrimSpace(key)
+		if !found || key == "" {
+			return nil, fmt.Errorf("invalid --tag %q: expected key=value form with a non-empty key", t)
+		}
+		tags = append(tags, map[string]interface{}{
+			"key":   key,
+			"value": strings.TrimSpace(value),
+		})
+	}
+	return tags, nil
+}
+
+// parseTagRequests converts key=value flags into tag request entries for update-tags,
+// stamping each with the given isEdited marker.
+func parseTagRequests(raw []string, isEdited bool) ([]interface{}, error) {
+	out := make([]interface{}, 0, len(raw))
+	for _, t := range raw {
+		key, value, found := strings.Cut(t, "=")
+		key = strings.TrimSpace(key)
+		if !found || key == "" {
+			return nil, fmt.Errorf("invalid tag %q: expected key=value form with a non-empty key", t)
+		}
+		out = append(out, map[string]interface{}{
+			"isEdited": isEdited,
+			"key":      key,
+			"value":    strings.TrimSpace(value),
+		})
+	}
+	return out, nil
 }
