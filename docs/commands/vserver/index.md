@@ -89,6 +89,12 @@ grn vserver <resource> <command> [options]
 | [user-image list](list-user-images.md) | List all user images |
 | [user-image delete](delete-user-image.md) | Delete a user image |
 
+### Floating IP
+
+| Command | Description |
+|---------|-------------|
+| [floating-ip list](list-floating-ips.md) | List all floating IPs |
+
 ### Reference
 
 | Command | Description |

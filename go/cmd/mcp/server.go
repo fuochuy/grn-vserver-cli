@@ -48,6 +48,7 @@ func runMCP(cmd *cobra.Command, args []string) error {
 	registerSSHKeyTools(s)
 	registerPlacementGroupTools(s)
 	registerUserImageTools(s)
+	registerFloatingIPTools(s)
 
 	return server.ServeStdio(s)
 }
@@ -559,6 +560,21 @@ func registerUserImageTools(s *server.MCPServer) {
 		return textResult(grn("vserver", "user-image", "delete", "--force",
 			"--user-image-id", sarg(getArgs(r), "userImageId"),
 		)), nil
+	})
+}
+
+// ── floating IP tools ─────────────────────────────────────────────────────────
+
+func registerFloatingIPTools(s *server.MCPServer) {
+	s.AddTool(mcp.NewTool("list_floating_ips",
+		mcp.WithDescription("List all floating IPs (public WAN IP addresses) in the project."),
+		opt("name"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := []string{"vserver", "floating-ip", "list"}
+		if n := sarg(getArgs(r), "name"); n != "" {
+			args = append(args, "--name", n)
+		}
+		return textResult(grn(args...)), nil
 	})
 }
 

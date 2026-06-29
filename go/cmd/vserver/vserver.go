@@ -3,6 +3,7 @@ package vserver
 import (
 	"github.com/spf13/cobra"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/flavor"
+	"github.com/vngcloud/greennode-cli/cmd/vserver/floatingip"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/image"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/placementgroup"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/secgroup"
@@ -37,4 +38,5 @@ func init() {
 	VServerCmd.AddCommand(sshkey.SSHKeyCmd)
 	VServerCmd.AddCommand(placementgroup.PlacementGroupCmd)
 	VServerCmd.AddCommand(userimage.UserImageCmd)
+	VServerCmd.AddCommand(floatingip.FloatingIPCmd)
 }
