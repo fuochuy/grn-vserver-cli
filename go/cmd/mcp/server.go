@@ -482,6 +482,51 @@ func registerPlacementGroupTools(s *server.MCPServer) {
 		return textResult(grn(args...)), nil
 	})
 
+	s.AddTool(mcp.NewTool("list_placement_group_policies",
+		mcp.WithDescription("List the placement group policies available for create_placement_group. Returns policy IDs and names. Pass language 'vi' for Vietnamese descriptions (default English)."),
+		opt("language"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := []string{"vserver", "placement-group", "list-policies"}
+		if v := sarg(getArgs(r), "language"); v != "" {
+			args = append(args, "--language", v)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("create_placement_group",
+		mcp.WithDescription("Create a new placement group. Use list_placement_group_policies first to find a valid policyId."),
+		req("name", "Placement group name"),
+		req("policyId", "Policy ID (from list_placement_group_policies)"),
+		opt("description"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "placement-group", "create",
+			"--name", sarg(a, "name"),
+			"--policy-id", sarg(a, "policyId"),
+		}
+		if v := sarg(a, "description"); v != "" {
+			args = append(args, "--description", v)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("edit_placement_group",
+		mcp.WithDescription("Update a placement group's name and/or description. Only the provided fields are changed."),
+		req("placementGroupId", "Placement group (server group) ID"),
+		opt("name"),
+		opt("description"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "placement-group", "edit", "--placement-group-id", sarg(a, "placementGroupId")}
+		if v := sarg(a, "name"); v != "" {
+			args = append(args, "--name", v)
+		}
+		if v := sarg(a, "description"); v != "" {
+			args = append(args, "--description", v)
+		}
+		return textResult(grn(args...)), nil
+	})
+
 	s.AddTool(mcp.NewTool("delete_placement_group",
 		mcp.WithDescription("Delete a placement group. This action is irreversible. Always confirm with the user before calling this."),
 		req("placementGroupId", "Placement group (server group) ID"),

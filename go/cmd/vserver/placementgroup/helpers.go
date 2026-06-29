@@ -112,3 +112,85 @@ func outputGroupList(cmd *cobra.Command, cfg *config.Config, result interface{})
 	}
 	return outputResult(cmd, cfg, result)
 }
+
+// policyTableColumns is the column order shown when listing policies as a table.
+var policyTableColumns = []string{"uuid", "name", "status"}
+
+// selectPolicyLanguage collapses the bilingual description fields into a single
+// "description" field for the requested language ("vi" → descriptionVi, anything
+// else → the default English description) and drops "descriptionVi".
+func selectPolicyLanguage(v interface{}, lang string) interface{} {
+	switch t := v.(type) {
+	case map[string]interface{}:
+		out := make(map[string]interface{}, len(t))
+		for k, val := range t {
+			out[k] = selectPolicyLanguage(val, lang)
+		}
+		if _, hasVi := out["descriptionVi"]; hasVi {
+			if lang == "vi" {
+				out["description"] = out["descriptionVi"]
+			}
+			delete(out, "descriptionVi")
+		}
+		return out
+	case []interface{}:
+		out := make([]interface{}, len(t))
+		for i, item := range t {
+			out[i] = selectPolicyLanguage(item, lang)
+		}
+		return out
+	default:
+		return v
+	}
+}
+
+// outputPolicies prints the policy list. The description is rendered in the chosen
+// language; the table view shows only uuid/name/status with a shortened uuid.
+func outputPolicies(cmd *cobra.Command, cfg *config.Config, result interface{}, lang string) error {
+	result = selectPolicyLanguage(result, lang)
+	if resolveOutput(cmd, cfg) == "table" {
+		return vserverclient.OutputWithColumns(cmd, cfg, transformForTable(result), policyTableColumns)
+	}
+	return outputResult(cmd, cfg, result)
+}
+
+// policyItem is a single policy reduced to the fields needed for selection.
+type policyItem struct {
+	uuid string
+	name string
+}
+
+// extractPolicyItems pulls policy {uuid, name} pairs from a policies response,
+// handling the common envelope keys and a plain array.
+func extractPolicyItems(result interface{}) []policyItem {
+	var raw []interface{}
+	switch v := result.(type) {
+	case []interface{}:
+		raw = v
+	case map[string]interface{}:
+		for _, key := range []string{"data", "listData", "policies"} {
+			if d, ok := v[key].([]interface{}); ok {
+				raw = d
+				break
+			}
+		}
+	}
+
+	items := make([]policyItem, 0, len(raw))
+	for _, r := range raw {
+		m, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		uuid, _ := m["uuid"].(string)
+		if uuid == "" {
+			uuid, _ = m["id"].(string)
+		}
+		if uuid == "" {
+			continue
+		}
+		name, _ := m["name"].(string)
+		items = append(items, policyItem{uuid: uuid, name: name})
+	}
+	return items
+}

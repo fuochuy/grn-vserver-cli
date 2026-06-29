@@ -77,6 +77,9 @@ grn vserver <resource> <command> [options]
 | Command | Description |
 |---------|-------------|
 | [placement-group list](list-placement-groups.md) | List all placement groups |
+| [placement-group list-policies](list-placement-group-policies.md) | List available placement group policies |
+| [placement-group create](create-placement-group.md) | Create a new placement group |
+| [placement-group edit](edit-placement-group.md) | Update a placement group |
 | [placement-group delete](delete-placement-group.md) | Delete a placement group |
 
 ### Reference

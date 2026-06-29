@@ -8,7 +8,7 @@ import (
 var PlacementGroupCmd = &cobra.Command{
 	Use:   "placement-group",
 	Short: "Manage placement groups (server groups)",
-	Long:  "List and delete placement groups.",
+	Long:  "List, create, edit, and delete placement groups, and list available policies.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -16,5 +16,8 @@ var PlacementGroupCmd = &cobra.Command{
 
 func init() {
 	PlacementGroupCmd.AddCommand(listCmd)
+	PlacementGroupCmd.AddCommand(listPoliciesCmd)
+	PlacementGroupCmd.AddCommand(createCmd)
+	PlacementGroupCmd.AddCommand(editCmd)
 	PlacementGroupCmd.AddCommand(deleteCmd)
 }
