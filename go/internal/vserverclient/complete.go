@@ -96,6 +96,15 @@ var CompleteSecgroupIDs = buildCompleter(func(c *client.GreenNodeClient, project
 	return extractCompletions(result, []string{"listData"}, "id", "name"), nil
 })
 
+// CompletePlacementGroupIDs completes --placement-group-id flags.
+var CompletePlacementGroupIDs = buildCompleter(func(c *client.GreenNodeClient, projectID string) ([]string, error) {
+	result, err := c.Get(fmt.Sprintf("/v2/%s/serverGroups", projectID), map[string]string{"page": "1", "size": "100"})
+	if err != nil {
+		return nil, err
+	}
+	return extractCompletions(result, []string{"listData", "data"}, "id", "name"), nil
+})
+
 // CompleteSSHKeyIDs completes --sshkey-id flags.
 var CompleteSSHKeyIDs = buildCompleter(func(c *client.GreenNodeClient, projectID string) ([]string, error) {
 	result, err := c.Get(fmt.Sprintf("/v2/%s/sshKeys", projectID), map[string]string{"page": "1", "size": "100"})

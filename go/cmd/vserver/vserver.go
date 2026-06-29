@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/flavor"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/image"
+	"github.com/vngcloud/greennode-cli/cmd/vserver/placementgroup"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/secgroup"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/server"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/sshkey"
@@ -33,4 +34,5 @@ func init() {
 	VServerCmd.AddCommand(volumetype.VolumeTypeCmd)
 	VServerCmd.AddCommand(image.ImageCmd)
 	VServerCmd.AddCommand(sshkey.SSHKeyCmd)
+	VServerCmd.AddCommand(placementgroup.PlacementGroupCmd)
 }

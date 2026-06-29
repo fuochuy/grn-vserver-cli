@@ -46,6 +46,7 @@ func runMCP(cmd *cobra.Command, args []string) error {
 	registerNetworkTools(s)
 	registerSecgroupTools(s)
 	registerSSHKeyTools(s)
+	registerPlacementGroupTools(s)
 
 	return server.ServeStdio(s)
 }
@@ -463,6 +464,30 @@ func registerSSHKeyTools(s *server.MCPServer) {
 	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		return textResult(grn("vserver", "sshkey", "delete", "--force",
 			"--sshkey-id", sarg(getArgs(r), "sshKeyId"),
+		)), nil
+	})
+}
+
+// ── placement group tools ─────────────────────────────────────────────────────
+
+func registerPlacementGroupTools(s *server.MCPServer) {
+	s.AddTool(mcp.NewTool("list_placement_groups",
+		mcp.WithDescription("List all placement groups (server groups) in the project."),
+		opt("name"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := []string{"vserver", "placement-group", "list"}
+		if n := sarg(getArgs(r), "name"); n != "" {
+			args = append(args, "--name", n)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("delete_placement_group",
+		mcp.WithDescription("Delete a placement group. This action is irreversible. Always confirm with the user before calling this."),
+		req("placementGroupId", "Placement group (server group) ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "placement-group", "delete", "--force",
+			"--placement-group-id", sarg(getArgs(r), "placementGroupId"),
 		)), nil
 	})
 }

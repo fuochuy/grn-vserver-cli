@@ -72,6 +72,13 @@ grn vserver <resource> <command> [options]
 | [sshkey import](import-sshkey.md) | Import an existing SSH public key |
 | [sshkey delete](delete-sshkey.md) | Delete an SSH key |
 
+### Placement Group
+
+| Command | Description |
+|---------|-------------|
+| [placement-group list](list-placement-groups.md) | List all placement groups |
+| [placement-group delete](delete-placement-group.md) | Delete a placement group |
+
 ### Reference
 
 | Command | Description |
