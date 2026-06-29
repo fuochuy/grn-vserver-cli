@@ -1,6 +1,9 @@
 package server
 
-import "github.com/vngcloud/greennode-cli/internal/vserverclient"
+import (
+	"github.com/spf13/cobra"
+	"github.com/vngcloud/greennode-cli/internal/vserverclient"
+)
 
 func init() {
 	// --server-id on all commands that target an existing server
@@ -18,6 +21,13 @@ func init() {
 	// create-image: target server; tag-value: which tag key to inspect
 	createImageCmd.RegisterFlagCompletionFunc("server-id", vserverclient.CompleteServerIDs) //nolint:errcheck
 	tagValueCmd.RegisterFlagCompletionFunc("key", vserverclient.CompleteTagKeys)            //nolint:errcheck
+
+	// attach/detach floating IP: target server, the floating IP, and the network interface
+	for _, c := range []*cobra.Command{attachFloatingIPCmd, detachFloatingIPCmd} {
+		c.RegisterFlagCompletionFunc("server-id", vserverclient.CompleteServerIDs)                      //nolint:errcheck
+		c.RegisterFlagCompletionFunc("floating-ip-id", vserverclient.CompleteFloatingIPIDs)             //nolint:errcheck
+		c.RegisterFlagCompletionFunc("network-interface-id", vserverclient.CompleteNetworkInterfaceIDs) //nolint:errcheck
+	}
 
 	// create: zone, network, subnet, image, volume types, security group
 	createCmd.RegisterFlagCompletionFunc("zone-id", vserverclient.CompleteZoneIDs)                 //nolint:errcheck

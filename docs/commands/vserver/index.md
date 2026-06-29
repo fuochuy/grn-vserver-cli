@@ -21,6 +21,8 @@ grn vserver <resource> <command> [options]
 | [server resize](resize-server.md) | Resize a vServer instance to a different flavor |
 | [server update-secgroup](update-server-security-groups.md) | Update the security groups attached to a vServer instance |
 | [server create-image](create-server-image.md) | Create a user image from a vServer instance |
+| [server attach-floating-ip](attach-server-floating-ip.md) | Attach a floating IP to a server's network interface |
+| [server detach-floating-ip](detach-server-floating-ip.md) | Detach a floating IP from a server's network interface |
 | [server tag-key](list-tag-keys.md) | List all tag keys available in the project |
 | [server tag-value](list-tag-values.md) | List the possible values for a tag key |
 | [server delete](delete-server.md) | Delete a vServer instance |

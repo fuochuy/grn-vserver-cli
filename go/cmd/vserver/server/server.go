@@ -26,5 +26,7 @@ func init() {
 	ServerCmd.AddCommand(tagKeyCmd)
 	ServerCmd.AddCommand(tagValueCmd)
 	ServerCmd.AddCommand(createImageCmd)
+	ServerCmd.AddCommand(attachFloatingIPCmd)
+	ServerCmd.AddCommand(detachFloatingIPCmd)
 	ServerCmd.AddCommand(deleteCmd)
 }

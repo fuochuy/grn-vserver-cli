@@ -273,6 +273,26 @@ func registerServerTools(s *server.MCPServer) {
 		)), nil
 	})
 
+	for _, action := range []struct{ name, verb, cmd string }{
+		{"attach_server_floating_ip", "Attach", "attach-floating-ip"},
+		{"detach_server_floating_ip", "Detach", "detach-floating-ip"},
+	} {
+		action := action
+		s.AddTool(mcp.NewTool(action.name,
+			mcp.WithDescription(fmt.Sprintf("%s a floating IP (WAN IP) %s a network interface of a vServer instance.", action.verb, map[string]string{"Attach": "to", "Detach": "from"}[action.verb])),
+			req("serverId", "Server ID"),
+			req("floatingIpId", "Floating IP ID"),
+			req("networkInterfaceId", "Network interface ID the floating IP is attached to"),
+		), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			a := getArgs(r)
+			return textResult(grn("vserver", "server", action.cmd,
+				"--server-id", sarg(a, "serverId"),
+				"--floating-ip-id", sarg(a, "floatingIpId"),
+				"--network-interface-id", sarg(a, "networkInterfaceId"),
+			)), nil
+		})
+	}
+
 	s.AddTool(mcp.NewTool("delete_server",
 		mcp.WithDescription("Delete a vServer instance. This action is irreversible. Always confirm with the user before calling this."),
 		req("serverId", "Server ID"),
