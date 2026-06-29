@@ -103,6 +103,13 @@ grn vserver <resource> <command> [options]
 | [network-interface edit](edit-network-interface.md) | Rename a network interface |
 | [network-interface delete](delete-network-interface.md) | Delete a network interface |
 
+### DHCP
+
+| Command | Description |
+|---------|-------------|
+| [dhcp list](list-dhcp-options.md) | List all DHCP option sets |
+| [dhcp delete](delete-dhcp-option.md) | Delete a DHCP option set |
+
 ### Reference
 
 | Command | Description |

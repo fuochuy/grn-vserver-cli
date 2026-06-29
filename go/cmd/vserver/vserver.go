@@ -2,6 +2,7 @@ package vserver
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/vngcloud/greennode-cli/cmd/vserver/dhcp"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/flavor"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/floatingip"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/image"
@@ -41,4 +42,5 @@ func init() {
 	VServerCmd.AddCommand(userimage.UserImageCmd)
 	VServerCmd.AddCommand(floatingip.FloatingIPCmd)
 	VServerCmd.AddCommand(networkinterface.NetworkInterfaceCmd)
+	VServerCmd.AddCommand(dhcp.DhcpCmd)
 }

@@ -50,6 +50,7 @@ func runMCP(cmd *cobra.Command, args []string) error {
 	registerUserImageTools(s)
 	registerFloatingIPTools(s)
 	registerNetworkInterfaceTools(s)
+	registerDhcpTools(s)
 
 	return server.ServeStdio(s)
 }
@@ -611,6 +612,30 @@ func registerNetworkInterfaceTools(s *server.MCPServer) {
 	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		return textResult(grn("vserver", "network-interface", "delete", "--force",
 			"--network-interface-id", sarg(getArgs(r), "networkInterfaceId"),
+		)), nil
+	})
+}
+
+// ── DHCP option tools ─────────────────────────────────────────────────────────
+
+func registerDhcpTools(s *server.MCPServer) {
+	s.AddTool(mcp.NewTool("list_dhcp_options",
+		mcp.WithDescription("List all DHCP option sets in the project."),
+		opt("name"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := []string{"vserver", "dhcp", "list"}
+		if n := sarg(getArgs(r), "name"); n != "" {
+			args = append(args, "--name", n)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("delete_dhcp_option",
+		mcp.WithDescription("Delete a DHCP option set. This action is irreversible. Always confirm with the user before calling this."),
+		req("dhcpOptionId", "DHCP option ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "dhcp", "delete", "--force",
+			"--dhcp-option-id", sarg(getArgs(r), "dhcpOptionId"),
 		)), nil
 	})
 }

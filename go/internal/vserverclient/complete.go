@@ -114,6 +114,15 @@ var CompleteSSHKeyIDs = buildCompleter(func(c *client.GreenNodeClient, projectID
 	return extractCompletions(result, []string{"listData", "data"}, "id", "name"), nil
 })
 
+// CompleteDhcpOptionIDs completes --dhcp-option-id flags.
+var CompleteDhcpOptionIDs = buildCompleter(func(c *client.GreenNodeClient, projectID string) ([]string, error) {
+	result, err := c.Get(fmt.Sprintf("/v2/%s/dhcp_option", projectID), map[string]string{"page": "1", "size": "100"})
+	if err != nil {
+		return nil, err
+	}
+	return extractCompletions(result, []string{"listData", "data"}, "uuid", "name"), nil
+})
+
 // CompleteNetworkInterfaceIDs completes --network-interface-id flags.
 var CompleteNetworkInterfaceIDs = buildCompleter(func(c *client.GreenNodeClient, projectID string) ([]string, error) {
 	result, err := c.Get(fmt.Sprintf("/v2/%s/network-interfaces-elastic", projectID), map[string]string{"page": "1", "size": "100"})
