@@ -11,6 +11,10 @@ func init() {
 	deleteCmd.RegisterFlagCompletionFunc("server-id", vserverclient.CompleteServerIDs) //nolint:errcheck
 	resizeCmd.RegisterFlagCompletionFunc("server-id", vserverclient.CompleteServerIDs) //nolint:errcheck
 
+	// update-secgroup: target server + the security groups to attach
+	updateSecgroupCmd.RegisterFlagCompletionFunc("server-id", vserverclient.CompleteServerIDs)        //nolint:errcheck
+	updateSecgroupCmd.RegisterFlagCompletionFunc("security-group", vserverclient.CompleteSecgroupIDs) //nolint:errcheck
+
 	// create: zone, network, subnet, image, volume types, security group
 	createCmd.RegisterFlagCompletionFunc("zone-id", vserverclient.CompleteZoneIDs)                 //nolint:errcheck
 	createCmd.RegisterFlagCompletionFunc("network-id", vserverclient.CompleteVPCIDs)               //nolint:errcheck

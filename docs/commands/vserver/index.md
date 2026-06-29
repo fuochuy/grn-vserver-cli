@@ -19,6 +19,7 @@ grn vserver <resource> <command> [options]
 | [server stop](stop-server.md) | Stop a running vServer instance |
 | [server reboot](reboot-server.md) | Reboot a vServer instance |
 | [server resize](resize-server.md) | Resize a vServer instance to a different flavor |
+| [server update-secgroup](update-server-security-groups.md) | Update the security groups attached to a vServer instance |
 | [server delete](delete-server.md) | Delete a vServer instance |
 
 ### Volume
@@ -61,6 +62,15 @@ grn vserver <resource> <command> [options]
 | [secgroup rule get](get-security-group-rule.md) | Get a security group rule |
 | [secgroup rule create](create-security-group-rule.md) | Add a rule to a security group |
 | [secgroup rule delete](delete-security-group-rule.md) | Remove a rule from a security group |
+
+### SSH Key
+
+| Command | Description |
+|---------|-------------|
+| [sshkey list](list-sshkeys.md) | List all SSH keys |
+| [sshkey create](create-sshkey.md) | Create a new SSH key pair |
+| [sshkey import](import-sshkey.md) | Import an existing SSH public key |
+| [sshkey delete](delete-sshkey.md) | Delete an SSH key |
 
 ### Reference
 

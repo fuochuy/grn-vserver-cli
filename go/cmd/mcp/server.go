@@ -45,6 +45,7 @@ func runMCP(cmd *cobra.Command, args []string) error {
 	registerVolumeTools(s)
 	registerNetworkTools(s)
 	registerSecgroupTools(s)
+	registerSSHKeyTools(s)
 
 	return server.ServeStdio(s)
 }
@@ -255,6 +256,18 @@ func registerServerTools(s *server.MCPServer) {
 		)), nil
 	})
 
+	s.AddTool(mcp.NewTool("update_server_secgroups",
+		mcp.WithDescription("Replace the set of security groups attached to a vServer instance. The provided list becomes the complete set — any security group not included is detached. Use list_secgroups to find valid security group IDs."),
+		req("serverId", "Server ID"),
+		req("securityGroups", "Security group IDs to attach (comma-separated)"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		return textResult(grn("vserver", "server", "update-secgroup",
+			"--server-id", sarg(a, "serverId"),
+			"--security-group", sarg(a, "securityGroups"),
+		)), nil
+	})
+
 	s.AddTool(mcp.NewTool("delete_server",
 		mcp.WithDescription("Delete a vServer instance. This action is irreversible. Always confirm with the user before calling this."),
 		req("serverId", "Server ID"),
@@ -397,6 +410,60 @@ func registerNetworkTools(s *server.MCPServer) {
 			args = append(args, "--name", v)
 		}
 		return textResult(grn(args...)), nil
+	})
+}
+
+// ── ssh key tools ─────────────────────────────────────────────────────────────
+
+func registerSSHKeyTools(s *server.MCPServer) {
+	s.AddTool(mcp.NewTool("list_sshkeys",
+		mcp.WithDescription("List all SSH keys in the project."),
+		opt("name"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := []string{"vserver", "sshkey", "list"}
+		if n := sarg(getArgs(r), "name"); n != "" {
+			args = append(args, "--name", n)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("create_sshkey",
+		mcp.WithDescription("Create a new SSH key pair. The server generates both keys; the private key is saved as a '<name>.pem' file (in the Downloads directory by default, or outputDir if given) and is returned only once."),
+		req("name", "SSH key name"),
+		opt("outputDir"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "sshkey", "create", "--name", sarg(a, "name")}
+		if v := sarg(a, "outputDir"); v != "" {
+			args = append(args, "--output-dir", v)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("import_sshkey",
+		mcp.WithDescription("Import an existing SSH public key. Provide the key contents directly with publicKey, or a path to a public key file with publicKeyFile (exactly one)."),
+		req("name", "SSH key name"),
+		opt("publicKey"),
+		opt("publicKeyFile"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "sshkey", "import", "--name", sarg(a, "name")}
+		if v := sarg(a, "publicKey"); v != "" {
+			args = append(args, "--public-key", v)
+		}
+		if v := sarg(a, "publicKeyFile"); v != "" {
+			args = append(args, "--public-key-file", v)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("delete_sshkey",
+		mcp.WithDescription("Delete an SSH key. This action is irreversible. Always confirm with the user before calling this."),
+		req("sshKeyId", "SSH key ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "sshkey", "delete", "--force",
+			"--sshkey-id", sarg(getArgs(r), "sshKeyId"),
+		)), nil
 	})
 }
 

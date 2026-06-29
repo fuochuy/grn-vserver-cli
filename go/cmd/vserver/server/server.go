@@ -22,5 +22,6 @@ func init() {
 	ServerCmd.AddCommand(stopCmd)
 	ServerCmd.AddCommand(rebootCmd)
 	ServerCmd.AddCommand(resizeCmd)
+	ServerCmd.AddCommand(updateSecgroupCmd)
 	ServerCmd.AddCommand(deleteCmd)
 }

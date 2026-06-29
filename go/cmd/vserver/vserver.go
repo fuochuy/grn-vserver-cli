@@ -6,6 +6,7 @@ import (
 	"github.com/vngcloud/greennode-cli/cmd/vserver/image"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/secgroup"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/server"
+	"github.com/vngcloud/greennode-cli/cmd/vserver/sshkey"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/subnet"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/volume"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/volumetype"
@@ -31,4 +32,5 @@ func init() {
 	VServerCmd.AddCommand(flavor.FlavorCmd)
 	VServerCmd.AddCommand(volumetype.VolumeTypeCmd)
 	VServerCmd.AddCommand(image.ImageCmd)
+	VServerCmd.AddCommand(sshkey.SSHKeyCmd)
 }
