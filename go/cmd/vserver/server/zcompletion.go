@@ -15,6 +15,10 @@ func init() {
 	updateSecgroupCmd.RegisterFlagCompletionFunc("server-id", vserverclient.CompleteServerIDs)        //nolint:errcheck
 	updateSecgroupCmd.RegisterFlagCompletionFunc("security-group", vserverclient.CompleteSecgroupIDs) //nolint:errcheck
 
+	// create-image: target server; tag-value: which tag key to inspect
+	createImageCmd.RegisterFlagCompletionFunc("server-id", vserverclient.CompleteServerIDs) //nolint:errcheck
+	tagValueCmd.RegisterFlagCompletionFunc("key", vserverclient.CompleteTagKeys)            //nolint:errcheck
+
 	// create: zone, network, subnet, image, volume types, security group
 	createCmd.RegisterFlagCompletionFunc("zone-id", vserverclient.CompleteZoneIDs)                 //nolint:errcheck
 	createCmd.RegisterFlagCompletionFunc("network-id", vserverclient.CompleteVPCIDs)               //nolint:errcheck

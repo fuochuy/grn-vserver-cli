@@ -141,6 +141,45 @@ var CompleteUserImageIDs = buildCompleter(func(c *client.GreenNodeClient, projec
 	return extractCompletions(result, []string{"listData", "data"}, "uuid", "name"), nil
 })
 
+// CompleteTagKeys completes --key flags from the project's tag keys.
+// The endpoint may return either a plain string array or an array of objects,
+// so both shapes are handled.
+var CompleteTagKeys = buildCompleter(func(c *client.GreenNodeClient, projectID string) ([]string, error) {
+	result, err := c.Get(fmt.Sprintf("/v2/%s/tag/tag-key", projectID), nil)
+	if err != nil {
+		return nil, err
+	}
+	var items []interface{}
+	switch v := result.(type) {
+	case []interface{}:
+		items = v
+	case map[string]interface{}:
+		for _, key := range []string{"data", "listData", "tagKeys"} {
+			if d, ok := v[key].([]interface{}); ok {
+				items = d
+				break
+			}
+		}
+	}
+	out := make([]string, 0, len(items))
+	for _, item := range items {
+		switch t := item.(type) {
+		case string:
+			if t != "" {
+				out = append(out, t)
+			}
+		case map[string]interface{}:
+			for _, field := range []string{"key", "name", "value"} {
+				if s, ok := t[field].(string); ok && s != "" {
+					out = append(out, s)
+					break
+				}
+			}
+		}
+	}
+	return out, nil
+})
+
 // CompleteImageIDs completes --image-id flags by combining OS and GPU images.
 var CompleteImageIDs = buildCompleter(func(c *client.GreenNodeClient, projectID string) ([]string, error) {
 	var completions []string

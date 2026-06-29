@@ -286,6 +286,40 @@ func registerServerTools(s *server.MCPServer) {
 		}
 		return textResult(grn(args...)), nil
 	})
+
+	s.AddTool(mcp.NewTool("list_tag_keys",
+		mcp.WithDescription("List all tag keys available in the project. Tag keys are used with create_server_image."),
+	), func(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "server", "tag-key")), nil
+	})
+
+	s.AddTool(mcp.NewTool("list_tag_values",
+		mcp.WithDescription("List the possible values for a given tag key. Use list_tag_keys to find valid keys."),
+		req("key", "Tag key whose values to list"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "server", "tag-value", "--key", sarg(getArgs(r), "key"))), nil
+	})
+
+	s.AddTool(mcp.NewTool("create_server_image",
+		mcp.WithDescription("Create a user image (custom image) from a vServer instance. Optionally attach tags."),
+		req("serverId", "Server ID to create the image from"),
+		req("name", "Name of the new image"),
+		mcp.WithString("tags", mcp.Description("Optional tags as a comma-separated list of key=value pairs, e.g. \"env=prod,team=infra\"")),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "server", "create-image",
+			"--server-id", sarg(a, "serverId"),
+			"--name", sarg(a, "name"),
+		}
+		if tags := sarg(a, "tags"); tags != "" {
+			for _, t := range strings.Split(tags, ",") {
+				if t = strings.TrimSpace(t); t != "" {
+					args = append(args, "--tag", t)
+				}
+			}
+		}
+		return textResult(grn(args...)), nil
+	})
 }
 
 // ── volume tools ───────────────────────────────────────────────────────────────
@@ -552,6 +586,31 @@ func registerUserImageTools(s *server.MCPServer) {
 		if n := sarg(getArgs(r), "name"); n != "" {
 			args = append(args, "--name", n)
 		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("update_user_image_tags",
+		mcp.WithDescription("Replace the key/value tag list of a user image. The provided tags become the complete set — any tag not included is removed. Tags that were changed should go in editedTags so they are marked isEdited=true."),
+		req("userImageId", "User image ID whose tags to update"),
+		mcp.WithString("tags", mcp.Description("Unchanged tags as a comma-separated list of key=value pairs (isEdited=false), e.g. \"env=prod,team=infra\"")),
+		mcp.WithString("editedTags", mcp.Description("Changed tags as a comma-separated list of key=value pairs (isEdited=true)")),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "user-image", "update-tags",
+			"--user-image-id", sarg(a, "userImageId"),
+		}
+		appendTagFlags := func(value, flag string) {
+			if value == "" {
+				return
+			}
+			for _, t := range strings.Split(value, ",") {
+				if t = strings.TrimSpace(t); t != "" {
+					args = append(args, flag, t)
+				}
+			}
+		}
+		appendTagFlags(sarg(a, "tags"), "--tag")
+		appendTagFlags(sarg(a, "editedTags"), "--edited-tag")
 		return textResult(grn(args...)), nil
 	})
 

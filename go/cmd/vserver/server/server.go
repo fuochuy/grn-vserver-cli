@@ -23,5 +23,8 @@ func init() {
 	ServerCmd.AddCommand(rebootCmd)
 	ServerCmd.AddCommand(resizeCmd)
 	ServerCmd.AddCommand(updateSecgroupCmd)
+	ServerCmd.AddCommand(tagKeyCmd)
+	ServerCmd.AddCommand(tagValueCmd)
+	ServerCmd.AddCommand(createImageCmd)
 	ServerCmd.AddCommand(deleteCmd)
 }

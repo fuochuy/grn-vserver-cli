@@ -16,5 +16,6 @@ var UserImageCmd = &cobra.Command{
 
 func init() {
 	UserImageCmd.AddCommand(listCmd)
+	UserImageCmd.AddCommand(updateTagsCmd)
 	UserImageCmd.AddCommand(deleteCmd)
 }
