@@ -49,6 +49,7 @@ func runMCP(cmd *cobra.Command, args []string) error {
 	registerPlacementGroupTools(s)
 	registerUserImageTools(s)
 	registerFloatingIPTools(s)
+	registerNetworkInterfaceTools(s)
 
 	return server.ServeStdio(s)
 }
@@ -575,6 +576,42 @@ func registerFloatingIPTools(s *server.MCPServer) {
 			args = append(args, "--name", n)
 		}
 		return textResult(grn(args...)), nil
+	})
+}
+
+// ── network interface tools ───────────────────────────────────────────────────
+
+func registerNetworkInterfaceTools(s *server.MCPServer) {
+	s.AddTool(mcp.NewTool("list_network_interfaces",
+		mcp.WithDescription("List all elastic network interfaces in the project."),
+		opt("name"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := []string{"vserver", "network-interface", "list"}
+		if n := sarg(getArgs(r), "name"); n != "" {
+			args = append(args, "--name", n)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("rename_network_interface",
+		mcp.WithDescription("Rename an elastic network interface. Only the name can be changed."),
+		req("networkInterfaceId", "Network interface ID"),
+		req("name", "New name"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		return textResult(grn("vserver", "network-interface", "edit",
+			"--network-interface-id", sarg(a, "networkInterfaceId"),
+			"--name", sarg(a, "name"),
+		)), nil
+	})
+
+	s.AddTool(mcp.NewTool("delete_network_interface",
+		mcp.WithDescription("Delete an elastic network interface. This action is irreversible. Always confirm with the user before calling this."),
+		req("networkInterfaceId", "Network interface ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "network-interface", "delete", "--force",
+			"--network-interface-id", sarg(getArgs(r), "networkInterfaceId"),
+		)), nil
 	})
 }
 

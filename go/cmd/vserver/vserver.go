@@ -5,6 +5,7 @@ import (
 	"github.com/vngcloud/greennode-cli/cmd/vserver/flavor"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/floatingip"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/image"
+	"github.com/vngcloud/greennode-cli/cmd/vserver/networkinterface"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/placementgroup"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/secgroup"
 	"github.com/vngcloud/greennode-cli/cmd/vserver/server"
@@ -39,4 +40,5 @@ func init() {
 	VServerCmd.AddCommand(placementgroup.PlacementGroupCmd)
 	VServerCmd.AddCommand(userimage.UserImageCmd)
 	VServerCmd.AddCommand(floatingip.FloatingIPCmd)
+	VServerCmd.AddCommand(networkinterface.NetworkInterfaceCmd)
 }

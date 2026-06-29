@@ -95,6 +95,14 @@ grn vserver <resource> <command> [options]
 |---------|-------------|
 | [floating-ip list](list-floating-ips.md) | List all floating IPs |
 
+### Network Interface
+
+| Command | Description |
+|---------|-------------|
+| [network-interface list](list-network-interfaces.md) | List all elastic network interfaces |
+| [network-interface edit](edit-network-interface.md) | Rename a network interface |
+| [network-interface delete](delete-network-interface.md) | Delete a network interface |
+
 ### Reference
 
 | Command | Description |
