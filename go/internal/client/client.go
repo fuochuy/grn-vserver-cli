@@ -82,6 +82,11 @@ func (c *GreenNodeClient) Put(path string, body interface{}) (interface{}, error
 	return c.request("PUT", path, nil, body)
 }
 
+// Patch performs a PATCH request with a JSON body.
+func (c *GreenNodeClient) Patch(path string, body interface{}) (interface{}, error) {
+	return c.request("PATCH", path, nil, body)
+}
+
 // Delete performs a DELETE request with optional query params.
 func (c *GreenNodeClient) Delete(path string, params map[string]string) (interface{}, error) {
 	return c.request("DELETE", path, params, nil)

@@ -689,6 +689,57 @@ func registerDhcpTools(s *server.MCPServer) {
 		return textResult(grn(args...)), nil
 	})
 
+	s.AddTool(mcp.NewTool("create_dhcp_option",
+		mcp.WithDescription("Create a new DHCP option set. The two default DNS servers (10.166.12.196, 10.166.12.197) are always included; up to 2 more may be added via dnsServers (4 total)."),
+		req("name", "Name of the DHCP option set"),
+		mcp.WithString("dnsServers", mcp.Description("Additional DNS server IPs as a comma-separated list (max 2), e.g. \"10.0.0.1,10.0.0.2\"")),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "dhcp", "create", "--name", sarg(a, "name")}
+		if dns := sarg(a, "dnsServers"); dns != "" {
+			for _, ip := range strings.Split(dns, ",") {
+				if ip = strings.TrimSpace(ip); ip != "" {
+					args = append(args, "--dns-server", ip)
+				}
+			}
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("get_dhcp_option",
+		mcp.WithDescription("Get the full details of a single DHCP option set by its ID."),
+		req("dhcpOptionId", "DHCP option ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "dhcp", "get",
+			"--dhcp-option-id", sarg(getArgs(r), "dhcpOptionId"),
+		)), nil
+	})
+
+	s.AddTool(mcp.NewTool("list_dhcp_option_vpcs",
+		mcp.WithDescription("List the VPCs (networks) currently associated with a DHCP option set."),
+		req("dhcpOptionId", "DHCP option ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "dhcp", "list-vpcs",
+			"--dhcp-option-id", sarg(getArgs(r), "dhcpOptionId"),
+		)), nil
+	})
+
+	s.AddTool(mcp.NewTool("associate_vpc_dhcp_option",
+		mcp.WithDescription("Associate a VPC with a DHCP option set, or detach it. A VPC can belong to only one DHCP option set. Provide dhcpOptionId to associate; set detach=true to remove the VPC's association."),
+		req("vpcId", "VPC (network) ID to update"),
+		opt("dhcpOptionId"),
+		mcp.WithBoolean("detach", mcp.Description("Detach the VPC from its current DHCP option set (default false)")),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "dhcp", "associate-vpc", "--vpc-id", sarg(a, "vpcId")}
+		if d, _ := a["detach"].(bool); d {
+			args = append(args, "--detach")
+		} else if id := sarg(a, "dhcpOptionId"); id != "" {
+			args = append(args, "--dhcp-option-id", id)
+		}
+		return textResult(grn(args...)), nil
+	})
+
 	s.AddTool(mcp.NewTool("delete_dhcp_option",
 		mcp.WithDescription("Delete a DHCP option set. This action is irreversible. Always confirm with the user before calling this."),
 		req("dhcpOptionId", "DHCP option ID"),

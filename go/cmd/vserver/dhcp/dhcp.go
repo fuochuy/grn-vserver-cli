@@ -8,7 +8,7 @@ import (
 var DhcpCmd = &cobra.Command{
 	Use:   "dhcp",
 	Short: "Manage DHCP options",
-	Long:  "List and delete DHCP option sets.",
+	Long:  "Create, list, inspect, and delete DHCP option sets, and manage their VPC associations.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -16,5 +16,9 @@ var DhcpCmd = &cobra.Command{
 
 func init() {
 	DhcpCmd.AddCommand(listCmd)
+	DhcpCmd.AddCommand(getCmd)
+	DhcpCmd.AddCommand(createCmd)
+	DhcpCmd.AddCommand(listVpcsCmd)
+	DhcpCmd.AddCommand(associateVpcCmd)
 	DhcpCmd.AddCommand(deleteCmd)
 }

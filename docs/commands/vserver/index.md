@@ -112,6 +112,10 @@ grn vserver <resource> <command> [options]
 | Command | Description |
 |---------|-------------|
 | [dhcp list](list-dhcp-options.md) | List all DHCP option sets |
+| [dhcp create](create-dhcp-option.md) | Create a new DHCP option set |
+| [dhcp get](get-dhcp-option.md) | Get details of a DHCP option set |
+| [dhcp list-vpcs](list-dhcp-vpcs.md) | List VPCs associated with a DHCP option set |
+| [dhcp associate-vpc](associate-dhcp-vpc.md) | Associate a VPC with a DHCP option set (or detach it) |
 | [dhcp delete](delete-dhcp-option.md) | Delete a DHCP option set |
 
 ### Reference

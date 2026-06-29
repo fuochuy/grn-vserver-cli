@@ -149,3 +149,93 @@ func outputDhcpList(cmd *cobra.Command, cfg *config.Config, result interface{}) 
 	}
 	return outputResult(cmd, cfg, result)
 }
+
+// outputDhcpDetail prints a single DHCP option. For table output it reuses the list's
+// row-expansion (so DNS servers each get their own row); other formats show the full response.
+func outputDhcpDetail(cmd *cobra.Command, cfg *config.Config, result interface{}) error {
+	if resolveOutput(cmd, cfg) == "table" {
+		if obj := dhcpObject(result); obj != nil {
+			return vserverclient.OutputWithColumns(cmd, cfg, expandRows([]interface{}{obj}), tableColumns)
+		}
+	}
+	return outputResult(cmd, cfg, result)
+}
+
+// dhcpObject extracts the DHCP option object from a get response, handling both a
+// {"data": {...}} envelope and a plain object.
+func dhcpObject(result interface{}) map[string]interface{} {
+	if v, ok := result.(map[string]interface{}); ok {
+		if d, ok := v["data"].(map[string]interface{}); ok {
+			return d
+		}
+		return v
+	}
+	return nil
+}
+
+// vpcTableColumns is the column order shown when listing the VPCs associated with a
+// DHCP option set. Fields not listed are hidden from the table but remain in JSON.
+var vpcTableColumns = []string{"id", "displayName", "cidr", "status", "createdAt"}
+
+// transformVpcsForTable shortens VPC ids and formats timestamps for table output.
+func transformVpcsForTable(result interface{}) interface{} {
+	switch v := result.(type) {
+	case map[string]interface{}:
+		out := make(map[string]interface{}, len(v))
+		for k, val := range v {
+			out[k] = val
+		}
+		for _, key := range []string{"listData", "data"} {
+			if arr, ok := v[key].([]interface{}); ok {
+				out[key] = transformVpcRows(arr)
+				return out
+			}
+		}
+		return out
+	case []interface{}:
+		return transformVpcRows(v)
+	default:
+		return result
+	}
+}
+
+func transformVpcRows(items []interface{}) []interface{} {
+	rows := make([]interface{}, 0, len(items))
+	for _, it := range items {
+		obj, ok := it.(map[string]interface{})
+		if !ok {
+			rows = append(rows, it)
+			continue
+		}
+		out := make(map[string]interface{}, len(obj))
+		for k, val := range obj {
+			switch {
+			case k == "id":
+				if s, ok := val.(string); ok {
+					out[k] = formatter.Truncate(s, uuidPreviewLen)
+					continue
+				}
+				out[k] = val
+			case k == "createdAt" || k == "updatedAt":
+				if s, ok := val.(string); ok {
+					out[k] = formatter.ShortDate(s)
+					continue
+				}
+				out[k] = val
+			default:
+				out[k] = val
+			}
+		}
+		rows = append(rows, out)
+	}
+	return rows
+}
+
+// outputVpcList prints the VPCs associated with a DHCP option set. For table output it
+// shortens ids and formats timestamps; other formats show the full response.
+func outputVpcList(cmd *cobra.Command, cfg *config.Config, result interface{}) error {
+	if resolveOutput(cmd, cfg) == "table" {
+		return vserverclient.OutputWithColumns(cmd, cfg, transformVpcsForTable(result), vpcTableColumns)
+	}
+	return outputResult(cmd, cfg, result)
+}
