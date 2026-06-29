@@ -637,6 +637,15 @@ func registerFloatingIPTools(s *server.MCPServer) {
 		}
 		return textResult(grn(args...)), nil
 	})
+
+	s.AddTool(mcp.NewTool("delete_floating_ip",
+		mcp.WithDescription("Delete a floating IP. This action is irreversible. Always confirm with the user before calling this."),
+		req("floatingIpId", "Floating IP ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "floating-ip", "delete", "--force",
+			"--floating-ip-id", sarg(getArgs(r), "floatingIpId"),
+		)), nil
+	})
 }
 
 // ── network interface tools ───────────────────────────────────────────────────

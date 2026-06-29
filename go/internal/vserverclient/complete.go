@@ -132,6 +132,15 @@ var CompleteNetworkInterfaceIDs = buildCompleter(func(c *client.GreenNodeClient,
 	return extractCompletions(result, []string{"listData", "data"}, "uuid", "name"), nil
 })
 
+// CompleteFloatingIPIDs completes --floating-ip-id flags.
+var CompleteFloatingIPIDs = buildCompleter(func(c *client.GreenNodeClient, projectID string) ([]string, error) {
+	result, err := c.Get(fmt.Sprintf("/v2/%s/wanIps", projectID), map[string]string{"page": "1", "size": "100"})
+	if err != nil {
+		return nil, err
+	}
+	return extractCompletions(result, []string{"listData", "data"}, "uuid", "ip"), nil
+})
+
 // CompleteUserImageIDs completes --user-image-id flags.
 var CompleteUserImageIDs = buildCompleter(func(c *client.GreenNodeClient, projectID string) ([]string, error) {
 	result, err := c.Get(fmt.Sprintf("/v2/%s/user-images/", projectID), map[string]string{"page": "1", "size": "100"})

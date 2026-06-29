@@ -16,4 +16,5 @@ var FloatingIPCmd = &cobra.Command{
 
 func init() {
 	FloatingIPCmd.AddCommand(listCmd)
+	FloatingIPCmd.AddCommand(deleteCmd)
 }

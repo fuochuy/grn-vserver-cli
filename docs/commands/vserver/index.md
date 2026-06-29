@@ -98,6 +98,7 @@ grn vserver <resource> <command> [options]
 | Command | Description |
 |---------|-------------|
 | [floating-ip list](list-floating-ips.md) | List all floating IPs |
+| [floating-ip delete](delete-floating-ip.md) | Delete a floating IP |
 
 ### Network Interface
 
