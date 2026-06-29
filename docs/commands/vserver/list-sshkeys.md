@@ -4,8 +4,11 @@
 
 List all SSH keys in the current project. Supports pagination and name filtering.
 
-In `table` and `text` output, the public key is shortened to a short preview so
-rows stay readable. To see the **full** public key, use `--output json`.
+In `table` output the columns are shown in a fixed, compact order — `id`,
+`name`, `status`, `createdAt`, `pubKey` — with the long public key last. The
+`id` is shortened to a preview, the public key is truncated, and the timestamp is
+shown as `DD-MM-YYYY HH:MM`. To see the **full** values (full id, full public
+key, full timestamp), use `--output json`.
 
 ## Synopsis
 
@@ -54,9 +57,9 @@ grn vserver sshkey list --output table
 ```
 
 ```
-ID                                       | NAME        | PUBLIC KEY
------------------------------------------+-------------+------------------------------------------
-ssh-a18340e0-a525-4550-bc7f-30d909cf8447 | minhpq3     | ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC2…
+ID                    | NAME     | STATUS | CREATED AT       | PUB KEY
+----------------------+----------+--------+------------------+------------------------------------------
+ssh-c5532395-c242-4b… | sshkey-1 | ACTIVE | 29-06-2026 16:02 | ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDE…
 ```
 
 See the full public key with JSON output:

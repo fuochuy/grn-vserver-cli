@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vngcloud/greennode-cli/internal/client"
 	"github.com/vngcloud/greennode-cli/internal/config"
+	"github.com/vngcloud/greennode-cli/internal/formatter"
 	"github.com/vngcloud/greennode-cli/internal/vserverclient"
 )
 
@@ -37,10 +38,17 @@ func resolveOutput(cmd *cobra.Command, cfg *config.Config) string {
 	return output
 }
 
-// keyPreviewLen is how many characters of a long key field are shown when truncated.
-const keyPreviewLen = 40
+// Preview widths (in runes) for long table fields.
+const (
+	keyPreviewLen = 40
+	idPreviewLen  = 20
+)
 
-// keyFieldsToTruncate are the long fields shortened in non-JSON output.
+// sshKeyTableColumns is the column order shown in table output. The long public key
+// is placed last so it never pushes the other columns out of alignment.
+var sshKeyTableColumns = []string{"id", "name", "status", "createdAt", "pubKey"}
+
+// keyFieldsToTruncate are the long key fields shortened in non-JSON output.
 var keyFieldsToTruncate = map[string]bool{
 	"publicKey":  true,
 	"pubKey":     true,
@@ -51,10 +59,7 @@ var keyFieldsToTruncate = map[string]bool{
 func truncateKeyString(s string) string {
 	s = strings.ReplaceAll(s, "\n", " ")
 	s = strings.ReplaceAll(s, "\r", "")
-	if len(s) <= keyPreviewLen {
-		return s
-	}
-	return s[:keyPreviewLen] + "…"
+	return formatter.Truncate(s, keyPreviewLen)
 }
 
 // truncateKeys returns a deep copy of the response with long key fields shortened,
@@ -84,13 +89,59 @@ func truncateKeys(v interface{}) interface{} {
 	}
 }
 
-// outputKeyList prints an SSH key list, shortening long key fields for table/text
-// output while keeping the full keys in JSON.
-func outputKeyList(cmd *cobra.Command, cfg *config.Config, result interface{}) error {
-	if resolveOutput(cmd, cfg) != "json" {
-		result = truncateKeys(result)
+// transformKeyTable adapts an SSH key list for table output: it shortens the id and
+// key fields and formats the timestamp compactly.
+func transformKeyTable(v interface{}) interface{} {
+	switch t := v.(type) {
+	case map[string]interface{}:
+		out := make(map[string]interface{}, len(t))
+		for k, val := range t {
+			switch {
+			case keyFieldsToTruncate[k]:
+				if s, ok := val.(string); ok {
+					out[k] = truncateKeyString(s)
+					continue
+				}
+				out[k] = val
+			case k == "id" || k == "uuid":
+				if s, ok := val.(string); ok {
+					out[k] = formatter.Truncate(s, idPreviewLen)
+					continue
+				}
+				out[k] = val
+			case k == "createdAt" || k == "updatedAt":
+				if s, ok := val.(string); ok {
+					out[k] = formatter.ShortDate(s)
+					continue
+				}
+				out[k] = val
+			default:
+				out[k] = transformKeyTable(val)
+			}
+		}
+		return out
+	case []interface{}:
+		out := make([]interface{}, len(t))
+		for i, item := range t {
+			out[i] = transformKeyTable(item)
+		}
+		return out
+	default:
+		return v
 	}
-	return outputResult(cmd, cfg, result)
+}
+
+// outputKeyList prints an SSH key list. Table output uses a fixed column order with
+// shortened id/key/date fields; text output shortens long keys; JSON shows full data.
+func outputKeyList(cmd *cobra.Command, cfg *config.Config, result interface{}) error {
+	switch resolveOutput(cmd, cfg) {
+	case "table":
+		return vserverclient.OutputWithColumns(cmd, cfg, transformKeyTable(result), sshKeyTableColumns)
+	case "json":
+		return outputResult(cmd, cfg, result)
+	default:
+		return outputResult(cmd, cfg, truncateKeys(result))
+	}
 }
 
 // outputKeyMutation prints the response of create/import. Key fields are always

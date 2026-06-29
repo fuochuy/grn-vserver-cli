@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vngcloud/greennode-cli/internal/client"
 	"github.com/vngcloud/greennode-cli/internal/config"
+	"github.com/vngcloud/greennode-cli/internal/formatter"
 	"github.com/vngcloud/greennode-cli/internal/vserverclient"
 )
 
@@ -35,20 +36,15 @@ func resolveOutput(cmd *cobra.Command, cfg *config.Config) string {
 	return output
 }
 
-// uuidPreviewLen is how many characters of the uuid are shown in table output.
-const uuidPreviewLen = 20
+// Preview widths (in runes) for long table fields.
+const (
+	uuidPreviewLen = 20
+	descPreviewLen = 40
+)
 
 // tableColumns is the column order shown in table output. Fields not listed here
 // (e.g. policyId, serverGroupId) are hidden from the table but remain in JSON.
 var tableColumns = []string{"uuid", "name", "policyName", "description", "servers", "createdAt"}
-
-// truncateID shortens a long id to a readable preview for table output.
-func truncateID(s string) string {
-	if len(s) <= uuidPreviewLen {
-		return s
-	}
-	return s[:uuidPreviewLen] + "…"
-}
 
 // serverNames turns a "servers" array of {name, uuid} objects into a comma-separated
 // list of names, so the table column shows names instead of nested maps.
@@ -70,22 +66,23 @@ func serverNames(v interface{}) interface{} {
 	return strings.Join(names, ", ")
 }
 
-// transformForTable adapts a placement group response for table output: it shortens
-// the uuid and renders servers as a comma-separated list of names. It is only applied
-// for table output — JSON keeps the full response.
+// transformForTable adapts a placement group / policy response for table output:
+// it shortens the uuid and description, formats timestamps compactly, and renders
+// servers as a comma-separated list of names. Applied only for table output — JSON
+// keeps the full response.
 func transformForTable(v interface{}) interface{} {
 	switch t := v.(type) {
 	case map[string]interface{}:
 		out := make(map[string]interface{}, len(t))
 		for k, val := range t {
-			switch k {
-			case "uuid":
-				if s, ok := val.(string); ok {
-					out[k] = truncateID(s)
-					continue
-				}
-				out[k] = val
-			case "servers":
+			switch {
+			case k == "uuid":
+				out[k] = truncStr(val, uuidPreviewLen)
+			case k == "description":
+				out[k] = truncStr(val, descPreviewLen)
+			case k == "createdAt" || k == "updatedAt":
+				out[k] = shortDate(val)
+			case k == "servers":
 				out[k] = serverNames(val)
 			default:
 				out[k] = transformForTable(val)
@@ -101,6 +98,22 @@ func transformForTable(v interface{}) interface{} {
 	default:
 		return v
 	}
+}
+
+// truncStr shortens a string value to max runes; non-strings are returned as-is.
+func truncStr(val interface{}, max int) interface{} {
+	if s, ok := val.(string); ok {
+		return formatter.Truncate(s, max)
+	}
+	return val
+}
+
+// shortDate reformats a timestamp string compactly; non-strings are returned as-is.
+func shortDate(val interface{}) interface{} {
+	if s, ok := val.(string); ok {
+		return formatter.ShortDate(s)
+	}
+	return val
 }
 
 // outputGroupList prints a placement group list. For table output it applies

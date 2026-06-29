@@ -11,11 +11,13 @@ table format differs slightly:
 - columns are shown in a fixed order: `uuid`, `name`, `policyName`,
   `description`, `servers`, `createdAt`;
 - other fields (e.g. `policyId`, `serverGroupId`) are hidden;
-- the `uuid` column is shortened to a preview;
+- the `uuid` and `description` columns are shortened to a preview;
+- the `createdAt` timestamp is shown as `DD-MM-YYYY HH:MM`;
 - the `servers` column shows only the server **names** (comma-separated) instead
   of the full nested objects.
 
-Use `--output json` when you need the full values (full `uuid`, `policyId`, etc.).
+Use `--output json` when you need the full values (full `uuid`, `policyId`, full
+description and timestamp, etc.).
 
 ## Synopsis
 
@@ -64,9 +66,9 @@ grn vserver placement-group list --output table
 ```
 
 ```
-UUID                   | NAME | POLICY NAME        | DESCRIPTION | SERVERS                             | CREATED AT
------------------------+------+--------------------+-------------+-------------------------------------+-----------
-server-group-4f9904a…  | pg-a | SOFT ANTI AFFINITY | my group    | mp-pfsense_pfSense-CE-2_8_1, web-01 | 2026-06-29
+UUID                  | NAME     | POLICY NAME        | DESCRIPTION    | SERVERS                     | CREATED AT
+----------------------+----------+--------------------+----------------+-----------------------------+-----------------
+server-group-f1f27a9… | web-tier | SOFT ANTI AFFINITY | frontend nodes | mp-pfsense_pfSense-CE-2_8_1 | 29-06-2026 16:55
 ```
 
 See the full values (including `policyId` and full `uuid`) with JSON output:

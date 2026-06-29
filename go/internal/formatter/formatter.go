@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
+	"unicode/utf8"
 
 	"github.com/jmespath/go-jmespath"
 )
@@ -106,7 +108,7 @@ func formatTable(data interface{}, w io.Writer) {
 		headers := mapKeys(firstMap)
 		colWidths := make([]int, len(headers))
 		for i, h := range headers {
-			colWidths[i] = len(h)
+			colWidths[i] = dispLen(h)
 		}
 
 		strRows := make([][]string, len(rows))
@@ -116,8 +118,8 @@ func formatTable(data interface{}, w io.Writer) {
 			for j, h := range headers {
 				val := fmt.Sprint(m[h])
 				strRows[i][j] = val
-				if len(val) > colWidths[j] {
-					colWidths[j] = len(val)
+				if dispLen(val) > colWidths[j] {
+					colWidths[j] = dispLen(val)
 				}
 			}
 		}
@@ -228,7 +230,7 @@ func formatTableColumns(data interface{}, columns []string, w io.Writer) {
 
 	colWidths := make([]int, len(columns))
 	for i, h := range headers {
-		colWidths[i] = len(h)
+		colWidths[i] = dispLen(h)
 	}
 
 	strRows := make([][]string, len(rows))
@@ -241,8 +243,8 @@ func formatTableColumns(data interface{}, columns []string, w io.Writer) {
 				val = ""
 			}
 			strRows[i][j] = val
-			if len(val) > colWidths[j] {
-				colWidths[j] = len(val)
+			if dispLen(val) > colWidths[j] {
+				colWidths[j] = dispLen(val)
 			}
 		}
 	}
@@ -279,8 +281,45 @@ func isEmptyMap(data interface{}) bool {
 }
 
 func padRight(s string, n int) string {
-	if len(s) >= n {
+	w := dispLen(s)
+	if w >= n {
 		return s
 	}
-	return s + strings.Repeat(" ", n-len(s))
+	return s + strings.Repeat(" ", n-w)
+}
+
+// dispLen returns the display width of s in terminal columns. It counts runes
+// rather than bytes so multi-byte characters (e.g. "…" or Vietnamese text) do
+// not break table column alignment.
+func dispLen(s string) int {
+	return utf8.RuneCountInString(s)
+}
+
+// Truncate shortens s to at most max runes, appending "…" when it is cut.
+// It is rune-safe, so multi-byte characters are never split.
+func Truncate(s string, max int) string {
+	if max <= 0 || utf8.RuneCountInString(s) <= max {
+		return s
+	}
+	return string([]rune(s)[:max]) + "…"
+}
+
+// shortDateLayouts are the timestamp formats accepted by ShortDate.
+var shortDateLayouts = []string{
+	"2006-01-02T15:04:05.000Z07:00",
+	"2006-01-02T15:04:05Z07:00",
+	time.RFC3339Nano,
+	time.RFC3339,
+	"2006-01-02 15:04:05",
+}
+
+// ShortDate reformats an ISO-8601 timestamp to "DD-MM-YYYY HH:MM" for compact
+// table display. Strings that cannot be parsed are returned unchanged.
+func ShortDate(s string) string {
+	for _, layout := range shortDateLayouts {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t.Format("02-01-2006 15:04")
+		}
+	}
+	return s
 }
