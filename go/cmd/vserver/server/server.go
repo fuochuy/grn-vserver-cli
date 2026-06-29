@@ -28,5 +28,9 @@ func init() {
 	ServerCmd.AddCommand(createImageCmd)
 	ServerCmd.AddCommand(attachFloatingIPCmd)
 	ServerCmd.AddCommand(detachFloatingIPCmd)
+	ServerCmd.AddCommand(attachInternalInterfaceCmd)
+	ServerCmd.AddCommand(detachInternalInterfaceCmd)
+	ServerCmd.AddCommand(attachExternalInterfaceCmd)
+	ServerCmd.AddCommand(detachExternalInterfaceCmd)
 	ServerCmd.AddCommand(deleteCmd)
 }

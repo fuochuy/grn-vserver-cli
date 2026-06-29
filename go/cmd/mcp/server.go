@@ -293,6 +293,59 @@ func registerServerTools(s *server.MCPServer) {
 		})
 	}
 
+	s.AddTool(mcp.NewTool("attach_server_internal_interface",
+		mcp.WithDescription("Attach an internal network interface to a server, created on the given subnet. Optionally request a specific private IP."),
+		req("serverId", "Server ID"),
+		req("subnetId", "Subnet ID to create the interface on"),
+		opt("ip"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		args := []string{"vserver", "server", "attach-internal-interface",
+			"--server-id", sarg(a, "serverId"),
+			"--subnet-id", sarg(a, "subnetId"),
+		}
+		if ip := sarg(a, "ip"); ip != "" {
+			args = append(args, "--ip", ip)
+		}
+		return textResult(grn(args...)), nil
+	})
+
+	s.AddTool(mcp.NewTool("detach_server_internal_interfaces",
+		mcp.WithDescription("Detach one or more internal network interfaces from a server."),
+		req("serverId", "Server ID"),
+		req("networkInterfaceIds", "Internal network interface IDs to detach (comma-separated)"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		return textResult(grn("vserver", "server", "detach-internal-interface",
+			"--server-id", sarg(a, "serverId"),
+			"--network-interface-id", sarg(a, "networkInterfaceIds"),
+		)), nil
+	})
+
+	s.AddTool(mcp.NewTool("attach_server_external_interface",
+		mcp.WithDescription("Attach an existing external (elastic) network interface to a server."),
+		req("serverId", "Server ID"),
+		req("networkInterfaceId", "External network interface ID to attach"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		return textResult(grn("vserver", "server", "attach-external-interface",
+			"--server-id", sarg(a, "serverId"),
+			"--network-interface-id", sarg(a, "networkInterfaceId"),
+		)), nil
+	})
+
+	s.AddTool(mcp.NewTool("detach_server_external_interface",
+		mcp.WithDescription("Detach an external (elastic) network interface from a server."),
+		req("serverId", "Server ID"),
+		req("networkInterfaceId", "External network interface ID to detach"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		a := getArgs(r)
+		return textResult(grn("vserver", "server", "detach-external-interface",
+			"--server-id", sarg(a, "serverId"),
+			"--network-interface-id", sarg(a, "networkInterfaceId"),
+		)), nil
+	})
+
 	s.AddTool(mcp.NewTool("delete_server",
 		mcp.WithDescription("Delete a vServer instance. This action is irreversible. Always confirm with the user before calling this."),
 		req("serverId", "Server ID"),

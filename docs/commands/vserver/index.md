@@ -23,6 +23,10 @@ grn vserver <resource> <command> [options]
 | [server create-image](create-server-image.md) | Create a user image from a vServer instance |
 | [server attach-floating-ip](attach-server-floating-ip.md) | Attach a floating IP to a server's network interface |
 | [server detach-floating-ip](detach-server-floating-ip.md) | Detach a floating IP from a server's network interface |
+| [server attach-internal-interface](attach-server-internal-interface.md) | Attach an internal network interface to a server |
+| [server detach-internal-interface](detach-server-internal-interface.md) | Detach internal network interfaces from a server |
+| [server attach-external-interface](attach-server-external-interface.md) | Attach an external network interface to a server |
+| [server detach-external-interface](detach-server-external-interface.md) | Detach an external network interface from a server |
 | [server tag-key](list-tag-keys.md) | List all tag keys available in the project |
 | [server tag-value](list-tag-values.md) | List the possible values for a tag key |
 | [server delete](delete-server.md) | Delete a vServer instance |
