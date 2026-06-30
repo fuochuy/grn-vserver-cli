@@ -29,8 +29,8 @@ func init() {
 		c.RegisterFlagCompletionFunc("network-interface-id", vserverclient.CompleteNetworkInterfaceIDs) //nolint:errcheck
 	}
 
-	// attach/detach internal & external network interfaces: all target a server
-	for _, c := range []*cobra.Command{attachInternalInterfaceCmd, detachInternalInterfaceCmd, attachExternalInterfaceCmd, detachExternalInterfaceCmd} {
+	// attach/detach internal & external network interfaces and list-interfaces: all target a server
+	for _, c := range []*cobra.Command{attachInternalInterfaceCmd, detachInternalInterfaceCmd, attachExternalInterfaceCmd, detachExternalInterfaceCmd, listInterfacesCmd} {
 		c.RegisterFlagCompletionFunc("server-id", vserverclient.CompleteServerIDs) //nolint:errcheck
 	}
 	// external interfaces are elastic network interfaces; complete from that list

@@ -32,5 +32,6 @@ func init() {
 	ServerCmd.AddCommand(detachInternalInterfaceCmd)
 	ServerCmd.AddCommand(attachExternalInterfaceCmd)
 	ServerCmd.AddCommand(detachExternalInterfaceCmd)
+	ServerCmd.AddCommand(listInterfacesCmd)
 	ServerCmd.AddCommand(deleteCmd)
 }

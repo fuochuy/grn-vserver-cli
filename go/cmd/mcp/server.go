@@ -346,6 +346,15 @@ func registerServerTools(s *server.MCPServer) {
 		)), nil
 	})
 
+	s.AddTool(mcp.NewTool("list_server_interfaces",
+		mcp.WithDescription("List the network interfaces attached to a server, separated into internal (PRIVATE) and external (PUBLIC) interfaces."),
+		req("serverId", "Server ID"),
+	), func(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return textResult(grn("vserver", "server", "list-interfaces",
+			"--server-id", sarg(getArgs(r), "serverId"),
+		)), nil
+	})
+
 	s.AddTool(mcp.NewTool("delete_server",
 		mcp.WithDescription("Delete a vServer instance. This action is irreversible. Always confirm with the user before calling this."),
 		req("serverId", "Server ID"),

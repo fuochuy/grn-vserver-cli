@@ -23,6 +23,19 @@ func outputResult(cmd *cobra.Command, cfg *config.Config, data interface{}) erro
 	return vserverclient.Output(cmd, cfg, data)
 }
 
+// resolveOutput returns the effective output format, mirroring vserverclient.Output:
+// the --output flag, falling back to the configured default, then "json".
+func resolveOutput(cmd *cobra.Command, cfg *config.Config) string {
+	output, _ := cmd.Flags().GetString("output")
+	if output == "" && cfg != nil {
+		output = cfg.Output
+	}
+	if output == "" {
+		output = "json"
+	}
+	return output
+}
+
 // serverListColumns defines the columns shown in table mode for server list.
 var serverListColumns = []string{"uuid", "name", "status", "privateIp", "publicIp"}
 

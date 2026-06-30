@@ -27,6 +27,7 @@ grn vserver <resource> <command> [options]
 | [server detach-internal-interface](detach-server-internal-interface.md) | Detach internal network interfaces from a server |
 | [server attach-external-interface](attach-server-external-interface.md) | Attach an external network interface to a server |
 | [server detach-external-interface](detach-server-external-interface.md) | Detach an external network interface from a server |
+| [server list-interfaces](list-server-interfaces.md) | List the network interfaces attached to a server |
 | [server tag-key](list-tag-keys.md) | List all tag keys available in the project |
 | [server tag-value](list-tag-values.md) | List the possible values for a tag key |
 | [server delete](delete-server.md) | Delete a vServer instance |
