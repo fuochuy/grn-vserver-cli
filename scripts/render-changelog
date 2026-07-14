@@ -86,9 +86,12 @@ def insert_into_changelog(version, section):
         print(f"ERROR: '{marker}' not found in CHANGELOG.md", file=sys.stderr)
         sys.exit(1)
 
-    new_content = content.replace(
-        f"{marker}\n\n---\n",
-        f"{marker}\n\n---\n\n{section}\n---\n",
+    # Insert after [Unreleased], before the next ## section (with or without a --- separator)
+    new_content = re.sub(
+        r"(## \[Unreleased\]\n+)(---\n+)?(## \[)",
+        lambda m: m.group(1) + f"---\n\n{section}\n---\n\n" + m.group(3),
+        content,
+        count=1,
     )
 
     # Update the [Unreleased] comparison link

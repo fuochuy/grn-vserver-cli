@@ -9,6 +9,27 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [1.6.0] - 2026-07-14
+
+### Added
+
+- Added `grn vserver dhcp` commands: `list`, `create`, `get`, `delete`, `associate`, `list-networks`.
+- Added `grn vserver floatingip` commands: `list`, `delete`.
+- Added `grn vserver server attach-floatingip`, `detach-floatingip` sub-commands.
+- Added `grn vserver networkinterface` commands: `list`, `create`, `edit`, `delete`, `update-tag`.
+- Added `grn vserver server attach-interface`, `detach-interface`, `list-interfaces` sub-commands.
+- Added `grn vserver placementgroup` commands: `list`, `delete`, `create-policy`, `edit-policy`, `list-policies`.
+- Added `grn vserver sshkey` commands: `list`, `create`, `import`, `delete`.
+- Added `grn vserver userimage` commands: `list`, `create`, `delete`, `get-tag`, `update-tag`.
+
+### Changed
+
+- Improved table output format for `sshkey`, `placementgroup`, and server group policy commands.
+
+---
+
 ## [1.5.0] - 2026-06-02
 ### Added
 - Windows x86 (32-bit) release binary `grn-windows-386.exe` — added to `build-all` Makefile target, `scripts/release`, and the GitHub Actions release workflow
@@ -100,7 +121,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Cross-compiled binaries for Linux (amd64/arm64), macOS (amd64/arm64), and Windows (amd64)
 - One-line installer script
 
-[Unreleased]: https://github.com/fuochuy/grn-vserver-cli/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/fuochuy/grn-vserver-cli/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/fuochuy/grn-vserver-cli/compare/
 [1.4.0]: https://github.com/fuochuy/grn-vserver-cli/compare/v1.3.2...v1.4.0
 [1.3.2]: https://github.com/fuochuy/grn-vserver-cli/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/fuochuy/grn-vserver-cli/compare/v1.3.0...v1.3.1
